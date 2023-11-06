@@ -1,0 +1,65 @@
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+%matplotlib inline
+import warnings
+warnings.filterwarnings('ignore')
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
+from sklearn import metrics
+from sklearn.preprocessing import scale
+from sklearn.neighbors import KNeighborsClassifier
+
+# Step 1: Load and Explore the Dataset
+df = pd.read_csv('emails.csv')
+df.head()  # Display the first few rows to understand the data
+df.columns  # List of columns
+df.isnull().sum()  # Check for missing values
+df.dropna(inplace=True)  # Drop rows with missing values
+
+# Step 2: Data Preprocessing
+X = df.drop(['Prediction', 'Email No.'], axis=1)  # Features, excluding 'Email No.'
+y = df['Prediction']  # Target variable
+X = scale(X)  # Scale the features
+
+# Step 3: Split Data into Training and Testing Sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Step 4: K-Nearest Neighbors (KNN) Classifier
+knn = KNeighborsClassifier(n_neighbors=7)  # Create the KNN model with 7 neighbors
+knn.fit(X_train, y_train)  # Train the model
+
+y_pred_knn = knn.predict(X_test)  # Make predictions with KNN
+# Evaluate the KNN model
+knn_accuracy = metrics.accuracy_score(y_test, y_pred_knn)
+knn_confusion_matrix = metrics.confusion_matrix(y_test, y_pred_knn)
+print("KNN accuracy = ", knn_accuracy)
+print("KNN Confusion matrix", knn_confusion_matrix)
+
+# Step 5: Support Vector Machine (SVM) Classifier
+svm_model = SVC(C=1)  # Create the SVM model with C=1
+
+svm_model.fit(X_train, y_train)  # Train the SVM model
+
+y_pred_svm = svm_model.predict(X_test)  # Make predictions with SVM
+
+
+# Evaluate the SVM model
+svm_accuracy = metrics.accuracy_score(y_test, y_pred_svm)
+svm_confusion_matrix = metrics.confusion_matrix(y_test, y_pred_svm)
+print("SVM accuracy = ", svm_accuracy)
+print("SVM Confusion matrix", svm_confusion_matrix)
+
+# 2. Confusion Matrix Visualization
+sns.heatmap(knn_confusion_matrix, annot=True, fmt="d", cmap="Blues")
+plt.xlabel("Predicted Labels")
+plt.ylabel ("True Labels")
+plt.title("KNN Confusion Matrix")
+plt.show()
+
+sns.heatmap(svm_confusion_matrix, annot=True, fmt="d", cmap="Blues")
+plt.xlabel("Predicted Labels")
+plt.ylabel("True Labels")
+plt.title("SVM Confusion Matrix")
+plt.show()
